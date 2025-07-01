@@ -57,8 +57,8 @@ CREATE TABLE paid_routes (
     -- method is the HTTP method allowed for this route
     method TEXT NOT NULL,
     
-    -- price is the amount charged for accessing this route (USDC * 10^6)
-    price INT NOT NULL,
+    -- price is the amount charged for accessing this route in Wei (token base units)
+    price BIGINT NOT NULL,
     
     -- type indicates route type: "credit" or "subscription"
     type TEXT NOT NULL DEFAULT 'credit',
@@ -119,8 +119,8 @@ CREATE TABLE purchases (
     -- method is the HTTP method used
     method TEXT NOT NULL,
     
-    -- price is the amount charged (USDC * 10^6)
-    price INT NOT NULL,
+    -- price is the amount charged in Wei (token base units)
+    price BIGINT NOT NULL,
     
     -- type indicates purchase type
     type TEXT NOT NULL DEFAULT 'credit',
