@@ -7,9 +7,6 @@ CREATE TABLE users (
     -- wallet_address is the Ethereum wallet address (primary identifier)
     wallet_address VARCHAR(42) UNIQUE NOT NULL,
     
-    -- sigwei_secret is the secret for forwarded request verification
-    sigwei_secret TEXT NOT NULL,
-    
     -- payment_address is the custom payment address (optional override)
     payment_address TEXT NOT NULL DEFAULT '',
     
@@ -92,6 +89,9 @@ CREATE TABLE paid_routes (
     
     -- description for the route
     description TEXT,
+    
+    -- sigwei_secret is the secret for forwarded request verification
+    sigwei_secret TEXT NOT NULL,
     
     -- Statistics counters
     attempt_count INT NOT NULL DEFAULT 0,

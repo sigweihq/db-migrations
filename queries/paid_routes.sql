@@ -33,10 +33,10 @@ INSERT INTO paid_routes (
     user_id, is_enabled, attempt_count, payment_count, access_count,
     created_at, updated_at,
     type, credits, resource_type, original_filename, cover_url,
-    title, description
+    title, description, sigwei_secret
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
-    $13, $14, $15, $16, $17, $18, $19
+    $13, $14, $15, $16, $17, $18, $19, $20
 ) RETURNING *;
 
 -- name: IncrementAttemptCount :exec
@@ -64,4 +64,12 @@ WHERE short_code = $1 AND deleted_at IS NULL;
 -- DeletePaidRoute soft-deletes a paid route.
 UPDATE paid_routes SET
     deleted_at = $3
-WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL; 
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;
+
+-- name: UpdatePaidRouteSecret :one
+-- UpdatePaidRouteSecret updates the sigwei_secret for a paid route.
+UPDATE paid_routes SET
+    sigwei_secret = $3,
+    updated_at = $4
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+RETURNING *; 
