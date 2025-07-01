@@ -94,6 +94,9 @@ CREATE TABLE paid_routes (
     -- payment_address is the address to receive payments for this route
     payment_address VARCHAR(42) NOT NULL,
     
+    -- require_auth indicates whether authentication is required before payment verification
+    require_auth BOOLEAN NOT NULL DEFAULT false,
+    
     -- Statistics counters
     attempt_count INT NOT NULL DEFAULT 0,
     payment_count INT NOT NULL DEFAULT 0,
@@ -172,6 +175,7 @@ CREATE INDEX idx_revoked_tokens_expires_at ON revoked_tokens(expires_at);
 CREATE UNIQUE INDEX idx_paid_routes_short_code ON paid_routes(short_code);
 CREATE INDEX idx_paid_routes_user_id ON paid_routes(user_id);
 CREATE INDEX idx_paid_routes_deleted_at ON paid_routes(deleted_at);
+CREATE INDEX idx_paid_routes_require_auth ON paid_routes(require_auth);
 
 -- Transaction hierarchy indexes
 

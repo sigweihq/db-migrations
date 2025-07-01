@@ -12,6 +12,7 @@ DROP INDEX IF EXISTS idx_transactions_status;
 DROP INDEX IF EXISTS idx_transactions_network;
 DROP INDEX IF EXISTS idx_transactions_signer_address;
 
+DROP INDEX IF EXISTS idx_paid_routes_require_auth;
 DROP INDEX IF EXISTS idx_paid_routes_deleted_at;
 DROP INDEX IF EXISTS idx_paid_routes_user_id;
 DROP INDEX IF EXISTS idx_paid_routes_short_code;
