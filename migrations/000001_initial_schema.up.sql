@@ -1,4 +1,5 @@
--- Consolidated initial schema for wallet-based authentication system
+-- Three-tier transaction hierarchy schema for Sigwei
+-- Implements transactions -> x402_transactions -> purchases inheritance
 
 -- users table with wallet authentication
 CREATE TABLE users (
@@ -106,50 +107,49 @@ CREATE TABLE paid_routes (
     deleted_at TIMESTAMPTZ
 );
 
--- purchases table for successful payment transactions
-CREATE TABLE purchases (
+-- TIER 1: Base transactions table for blockchain transactions
+CREATE TABLE transactions (
     id BIGSERIAL PRIMARY KEY,
-    
-    -- short_code is the short code of the accessed route
-    short_code TEXT NOT NULL,
-    
-    -- target_url is the destination URL that was accessed
-    target_url TEXT NOT NULL,
-    
-    -- method is the HTTP method used
-    method TEXT NOT NULL,
-    
-    -- price is the amount charged in Wei (token base units)
-    price BIGINT NOT NULL,
-    
-    -- type indicates purchase type
-    type TEXT NOT NULL DEFAULT 'credit',
-    
-    -- credits tracking for credit-based purchases
-    credits_available INT NOT NULL DEFAULT 0,
-    credits_used INT NOT NULL DEFAULT 0,
-    
-    -- is_test indicates whether this was a testnet or mainnet transaction
-    is_test BOOLEAN NOT NULL,
-    
-    -- payment_header stores the X-Payment header
-    payment_header TEXT,
-    
-    -- payment_payload stores the payment data as bytes
-    payment_payload BYTEA,
-    
-    -- settle_response stores the settled response as bytes
-    settle_response BYTEA,
-    
-    -- paid_route_id is the associated PaidRoute
-    paid_route_id BIGINT NOT NULL REFERENCES paid_routes(id) ON DELETE CASCADE,
-    
-    -- paid_to_address is the address to which payment was made
-    paid_to_address VARCHAR(42) NOT NULL,
     
     -- Standard timestamp fields
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    -- Core blockchain transaction fields
+    signer_address VARCHAR(42) NOT NULL,
+    amount BIGINT NOT NULL,
+    network TEXT NOT NULL,
+    chain_id INTEGER,
+    transaction_hash TEXT UNIQUE,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    error TEXT
+);
+
+-- TIER 2: x402 protocol transactions extending base transactions
+CREATE TABLE x402_transactions (
+    id BIGINT PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,
+    
+    -- x402 payment protocol specific fields
+    payment_requirements_json TEXT,
+    payment_payload BYTEA,
+    payment_header TEXT,
+    settle_response BYTEA,
+    typed_data TEXT
+);
+
+-- TIER 3: Purchases extending x402 transactions for Sigwei-specific data
+CREATE TABLE purchases (
+    id BIGINT PRIMARY KEY REFERENCES x402_transactions(id) ON DELETE CASCADE,
+    
+    -- Sigwei-specific purchase fields
+    short_code TEXT NOT NULL,
+    target_url TEXT NOT NULL,
+    method TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'credit',
+    credits_available INT NOT NULL DEFAULT 0,
+    credits_used INT NOT NULL DEFAULT 0,
+    paid_route_id BIGINT NOT NULL REFERENCES paid_routes(id) ON DELETE CASCADE,
+    paid_to_address VARCHAR(42) NOT NULL
 );
 
 -- Create indexes for performance
@@ -173,7 +173,18 @@ CREATE UNIQUE INDEX idx_paid_routes_short_code ON paid_routes(short_code);
 CREATE INDEX idx_paid_routes_user_id ON paid_routes(user_id);
 CREATE INDEX idx_paid_routes_deleted_at ON paid_routes(deleted_at);
 
--- Purchase indexes
+-- Transaction hierarchy indexes
+
+-- Base transactions indexes
+CREATE INDEX idx_transactions_signer_address ON transactions(signer_address);
+CREATE INDEX idx_transactions_network ON transactions(network);
+CREATE INDEX idx_transactions_status ON transactions(status);
+CREATE INDEX idx_transactions_transaction_hash ON transactions(transaction_hash);
+CREATE INDEX idx_transactions_created_at ON transactions(created_at);
+
+-- x402 transactions indexes
+CREATE INDEX idx_x402_transactions_payment_header ON x402_transactions(payment_header);
+
+-- Purchase indexes (for three-tier hierarchy)
 CREATE INDEX idx_purchases_short_code ON purchases(short_code);
 CREATE INDEX idx_purchases_paid_route_id ON purchases(paid_route_id);
-CREATE INDEX idx_purchases_created_at ON purchases(created_at);
