@@ -7,9 +7,6 @@ CREATE TABLE users (
     -- wallet_address is the Ethereum wallet address (primary identifier)
     wallet_address VARCHAR(42) UNIQUE NOT NULL,
     
-    -- payment_address is the custom payment address (optional override)
-    payment_address TEXT NOT NULL DEFAULT '',
-    
     -- Standard timestamp fields
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -93,6 +90,9 @@ CREATE TABLE paid_routes (
     -- sigwei_secret is the secret for forwarded request verification
     sigwei_secret TEXT NOT NULL,
     
+    -- payment_address is the address to receive payments for this route
+    payment_address VARCHAR(42) NOT NULL,
+    
     -- Statistics counters
     attempt_count INT NOT NULL DEFAULT 0,
     payment_count INT NOT NULL DEFAULT 0,
@@ -145,7 +145,7 @@ CREATE TABLE purchases (
     paid_route_id BIGINT NOT NULL REFERENCES paid_routes(id) ON DELETE CASCADE,
     
     -- paid_to_address is the address to which payment was made
-    paid_to_address TEXT NOT NULL,
+    paid_to_address VARCHAR(42) NOT NULL,
     
     -- Standard timestamp fields
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -156,7 +156,6 @@ CREATE TABLE purchases (
 
 -- User indexes
 CREATE INDEX idx_users_wallet_address ON users(wallet_address);
-CREATE INDEX idx_users_payment_address ON users(payment_address);
 
 -- Auth nonce indexes
 CREATE INDEX idx_auth_nonces_wallet_address ON auth_nonces(wallet_address);
