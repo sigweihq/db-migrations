@@ -33,10 +33,10 @@ INSERT INTO paid_routes (
     user_id, is_enabled, attempt_count, payment_count, access_count,
     created_at, updated_at,
     type, credits, resource_type, original_filename, cover_url,
-    title, description, sigwei_secret, payment_address
+    title, description, sigwei_secret, payment_address, require_auth
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
-    $13, $14, $15, $16, $17, $18, $19, $20, $21
+    $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
 ) RETURNING *;
 
 -- name: IncrementAttemptCount :exec
