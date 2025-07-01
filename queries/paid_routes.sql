@@ -66,6 +66,16 @@ UPDATE paid_routes SET
     deleted_at = $3
 WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL;
 
+-- name: UpdatePaidRoute :one
+-- UpdatePaidRoute updates a paid route's basic information.
+UPDATE paid_routes SET
+    title = $3,
+    description = $4,
+    require_auth = $5,
+    updated_at = $6
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+RETURNING *;
+
 -- name: UpdatePaidRouteSecret :one
 -- UpdatePaidRouteSecret updates the sigwei_secret for a paid route.
 UPDATE paid_routes SET
