@@ -1,1 +1,1 @@
-# sigwei-db-migrations
+# db-migrations
